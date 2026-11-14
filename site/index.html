@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Statut des services — EasyAd</title>
+  <meta name="description" content="État en temps réel des services EasyAd : site, application, API, diffusion des annonces, paiements et bot Telegram.">
+  <meta name="theme-color" content="#2563EB">
+  <link rel="icon" href="https://easyyad.com/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#F6F8FD; --surface:#FFFFFF; --soft:#EEF3FC; --text:#16213F; --muted:#5E6A8A; --heading:#1B3AA6;
+      --primary:#2563EB; --border:#E1E8F6; --ok:#16A34A; --warn:#D97706; --bad:#E5484D; --none:#D5DDEC;
+      --ok-bg:#E3F6EA; --warn-bg:#FDF1DC; --bad-bg:#FDE7E8; --shadow:0 1px 2px rgba(22,33,63,.04),0 8px 24px -12px rgba(22,33,63,.12);
+    }
+    @media (prefers-color-scheme:dark){
+      :root:not([data-theme="light"]){
+        --bg:#070D1F; --surface:#0F1B3F; --soft:#0B1530; --text:#DCE5FF; --muted:#9FB0DA; --heading:#A9C2FF;
+        --primary:#3B82F6; --border:#1C2C5C; --ok:#4ADE80; --warn:#FBBF24; --bad:#F87171; --none:#22325F;
+        --ok-bg:#0F2E1E; --warn-bg:#33270B; --bad-bg:#371417; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+      }
+    }
+    :root[data-theme="dark"]{
+      --bg:#070D1F; --surface:#0F1B3F; --soft:#0B1530; --text:#DCE5FF; --muted:#9FB0DA; --heading:#A9C2FF;
+      --primary:#3B82F6; --border:#1C2C5C; --ok:#4ADE80; --warn:#FBBF24; --bad:#F87171; --none:#22325F;
+      --ok-bg:#0F2E1E; --warn-bg:#33270B; --bad-bg:#371417; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{background:var(--bg);color:var(--text);font:16px/1.55 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:var(--primary);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:860px;margin:0 auto;padding:0 16px}
+    header{padding:22px 0 8px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font:800 1.25rem/1 "Bricolage Grotesque",Figtree,sans-serif;color:var(--heading)}
+    .brand img{width:30px;height:30px;border-radius:8px}
+    .brand small{font:600 .85rem Figtree,sans-serif;color:var(--muted);margin-left:2px}
+    .tools{display:flex;gap:6px}
+    .tools button{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 12px;font:600 .82rem Figtree,sans-serif;cursor:pointer}
+    .tools button[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+
+    .hero{margin:22px 0 28px;padding:26px 24px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);display:flex;gap:16px;align-items:center}
+    .hero .big{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center}
+    .hero .big svg{width:26px;height:26px}
+    .hero h1{margin:0;font:800 clamp(1.3rem,3.2vw,1.75rem)/1.2 "Bricolage Grotesque",Figtree,sans-serif;color:var(--heading)}
+    .hero p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+    .s-operational .big{background:var(--ok-bg);color:var(--ok)}
+    .s-degraded .big{background:var(--warn-bg);color:var(--warn)}
+    .s-down .big{background:var(--bad-bg);color:var(--bad)}
+    .s-loading .big{background:var(--soft);color:var(--muted)}
+
+    h2{font:700 1.1rem/1.3 "Bricolage Grotesque",Figtree,sans-serif;color:var(--heading);margin:34px 0 12px}
+    .panel{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+    .comp{padding:18px 22px}
+    .comp + .comp{border-top:1px solid var(--border)}
+    .comp-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .comp-name{font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:.88rem;white-space:nowrap}
+    .dot{width:9px;height:9px;border-radius:50%;background:var(--none);flex:none}
+    .operational .dot{background:var(--ok)} .operational.pill{color:var(--ok)}
+    .degraded .dot{background:var(--warn)} .degraded.pill{color:var(--warn)}
+    .down .dot{background:var(--bad)} .down.pill{color:var(--bad)}
+    .bars{display:flex;gap:2px;height:30px;margin:12px 0 6px;align-items:stretch}
+    .bars i{flex:1;border-radius:3px;background:var(--none);min-width:2px;position:relative}
+    .bars i.d-ok{background:var(--ok);opacity:.85} .bars i.d-warn{background:var(--warn)} .bars i.d-bad{background:var(--bad)}
+    .bars i:hover{opacity:1;transform:scaleY(1.08)}
+    .bars-legend{display:flex;justify-content:space-between;color:var(--muted);font-size:.78rem}
+    .tip{position:fixed;z-index:10;pointer-events:none;background:var(--text);color:var(--bg);font-size:.8rem;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+
+    .inc{padding:18px 22px}
+    .inc + .inc{border-top:1px solid var(--border)}
+    .inc h3{margin:0 0 2px;font-size:1rem}
+    .inc .meta{color:var(--muted);font-size:.85rem}
+    .inc ol{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+    .inc li{font-size:.93rem}
+    .inc li b{font-weight:600}
+    .inc li time{color:var(--muted);font-size:.82rem;margin-left:6px}
+    .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.75rem;font-weight:700;background:var(--soft);color:var(--muted);margin-left:6px;vertical-align:2px}
+    .tag.open{background:var(--warn-bg);color:var(--warn)}
+    .empty{padding:20px 22px;color:var(--muted)}
+    footer{margin:38px 0 30px;color:var(--muted);font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+    @media (max-width:560px){
+      .hero{padding:20px 18px;border-radius:18px}
+      .comp,.inc{padding:16px}
+      .bars{gap:1px;height:26px}
+      .comp-head{align-items:flex-start;flex-direction:column;gap:4px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="top">
+        <a class="brand" href="https://easyyad.com"><img src="https://easyyad.com/icon-192.png" alt="">EasyAd <small data-t="status">Statut</small></a>
+        <div class="tools">
+          <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero s-loading" id="hero" aria-live="polite">
+      <div class="big" id="hero-icon"></div>
+      <div><h1 id="hero-title">…</h1><p id="hero-text"></p></div>
+    </section>
+
+    <h2 data-t="components">Services</h2>
+    <div class="panel" id="components"></div>
+
+    <h2 data-t="incidents">Incidents</h2>
+    <div class="panel" id="incidents"></div>
+
+    <footer>
+      <span id="updated"></span>
+      <span><a href="https://easyyad.com">easyyad.com</a> · <a href="mailto:support@easyyad.com">support@easyyad.com</a></span>
+    </footer>
+  </div>
+  <div class="tip" id="tip"></div>
+
+  <script>
+  (() => {
+    // Le dépôt est inscrit ici par le déploiement (workflow pages.yml) : les mesures vivent dans sa branche « data »
+    const REPO = '__REPOSITORY__';
+    const DATA_URL = `https://raw.githubusercontent.com/${REPO}/data/status.json`;
+    const DAYS = 90;
+
+    const T = {
+      fr: {
+        status: 'Statut', components: 'Services', incidents: 'Incidents',
+        operational: 'Opérationnel', degraded: 'Perturbé', down: 'En panne', unknown: 'Sans données',
+        all_ok: 'Tous les services fonctionnent', some: 'Certains services sont perturbés', major: 'Panne en cours',
+        all_ok_text: 'Aucun problème détecté lors de la dernière vérification.',
+        some_text: 'Nous surveillons la situation. Le détail est ci-dessous.',
+        major_text: 'Un ou plusieurs services ne répondent pas. Nous sommes dessus.',
+        loading: 'Vérification en cours…', no_data: 'Données indisponibles pour le moment',
+        no_data_text: 'Réessayez dans quelques minutes.',
+        days_ago: '{0} jours', today: "Aujourd'hui", uptime: '{0} % de disponibilité',
+        no_check: 'Pas de vérification', tip_ok: '{0} : opérationnel', tip_mixed: '{0} : {1} % disponible',
+        updated: 'Dernière vérification {0}', ago_min: 'il y a {0} min', ago_now: "à l'instant", ago_h: 'il y a {0} h',
+        since: 'depuis {0}', no_incident: 'Aucun incident ces 30 derniers jours.',
+        investigating: 'Analyse en cours', identified: 'Cause identifiée', monitoring: 'Surveillance', resolved: 'Résolu',
+        ongoing: 'En cours', locale: 'fr-FR',
+      },
+      en: {
+        status: 'Status', components: 'Services', incidents: 'Incidents',
+        operational: 'Operational', degraded: 'Degraded', down: 'Down', unknown: 'No data',
+        all_ok: 'All services are operational', some: 'Some services are degraded', major: 'Outage in progress',
+        all_ok_text: 'No problem detected at the last check.',
+        some_text: 'We are monitoring the situation. Details below.',
+        major_text: 'One or more services are not responding. We are on it.',
+        loading: 'Checking…', no_data: 'Data unavailable for now',
+        no_data_text: 'Please try again in a few minutes.',
+        days_ago: '{0} days ago', today: 'Today', uptime: '{0}% uptime',
+        no_check: 'No checks', tip_ok: '{0}: operational', tip_mixed: '{0}: {1}% available',
+        updated: 'Last checked {0}', ago_min: '{0} min ago', ago_now: 'just now', ago_h: '{0} h ago',
+        since: 'since {0}', no_incident: 'No incidents in the last 30 days.',
+        investigating: 'Investigating', identified: 'Identified', monitoring: 'Monitoring', resolved: 'Resolved',
+        ongoing: 'Ongoing', locale: 'en-GB',
+      },
+    };
+    const ICONS = {
+      operational: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+      degraded: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg>',
+      down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>',
+    };
+
+    let lang = (() => {
+      try { const s = localStorage.getItem('easyad-status-lang'); if (s) return s; } catch { /* rien */ }
+      return /^fr/i.test(navigator.language || '') ? 'fr' : 'en';
+    })();
+    let config = null, data = null, incidents = [];
+    const $ = (id) => document.getElementById(id);
+    const t = (k, ...a) => (T[lang][k] || k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    const pick = (v) => (v && typeof v === 'object' ? v[lang] ?? v.fr ?? '' : v ?? '');
+    const fmt = (iso, opts) => new Date(iso).toLocaleString(t('locale'), opts || { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const pct = (n) => (n >= 99.995 ? '100' : n.toFixed(2)).replace('.', lang === 'fr' ? ',' : '.');
+    const ago = (iso) => {
+      const m = Math.round((Date.now() - new Date(iso)) / 6e4);
+      return m < 1 ? t('ago_now') : m < 90 ? t('ago_min', m) : t('ago_h', Math.round(m / 60));
+    };
+
+    function renderHero() {
+      const hero = $('hero');
+      if (!data) {
+        hero.className = 'hero s-' + (data === null ? 'loading' : 'degraded');
+        $('hero-icon').innerHTML = data === null ? '' : ICONS.degraded;
+        $('hero-title').textContent = data === null ? t('loading') : t('no_data');
+        $('hero-text').textContent = data === null ? '' : t('no_data_text');
+        return;
+      }
+      // Une mesure de plus de 30 minutes ne dit plus rien de l'état actuel : on ne l'affiche pas comme du vert
+      const stale = Date.now() - new Date(data.updated_at) > 30 * 6e4;
+      const s = stale ? 'degraded' : data.overall;
+      hero.className = 'hero s-' + s;
+      $('hero-icon').innerHTML = ICONS[s];
+      $('hero-title').textContent = stale ? t('no_data') : t({ operational: 'all_ok', degraded: 'some', down: 'major' }[s]);
+      $('hero-text').textContent = stale ? t('no_data_text') : t({ operational: 'all_ok_text', degraded: 'some_text', down: 'major_text' }[s]);
+      $('updated').textContent = t('updated', ago(data.updated_at));
+    }
+
+    function renderComponents() {
+      const box = $('components');
+      box.innerHTML = config.components.map((c) => {
+        const cur = data?.components?.[c.id];
+        const s = cur?.status || 'unknown';
+        const days = data?.days?.[c.id] || {};
+        let ok = 0, total = 0;
+        const bars = [];
+        for (let i = DAYS - 1; i >= 0; i--) {
+          const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10);
+          const v = days[d];
+          if (!v) { bars.push(`<i data-tip="${esc(fmt(d + 'T12:00:00Z', { day: 'numeric', month: 'short' }))} — ${esc(t('no_check'))}"></i>`); continue; }
+          const [o, g, x] = v; const n = o + g + x; ok += o + g; total += n;
+          const p = ((o + g) / n) * 100;
+          const cls = x === 0 && g === 0 ? 'd-ok' : p >= 99 && x === 0 ? 'd-ok' : p >= 95 ? 'd-warn' : 'd-bad';
+          const label = fmt(d + 'T12:00:00Z', { day: 'numeric', month: 'short' });
+          bars.push(`<i class="${cls}" data-tip="${esc(cls === 'd-ok' && p === 100 ? t('tip_ok', label) : t('tip_mixed', label, pct(p)))}"></i>`);
+        }
+        const up = total ? t('uptime', pct((ok / total) * 100)) : '';
+        const since = cur && s !== 'operational' && cur.since ? ` · ${t('since', fmt(cur.since))}` : '';
+        return `<div class="comp">
+          <div class="comp-head"><span class="comp-name">${esc(pick(c.name))}</span>
+            <span class="pill ${s}"><span class="dot"></span>${esc(t(s))}${esc(since)}</span></div>
+          <div class="bars" aria-hidden="true">${bars.join('')}</div>
+          <div class="bars-legend"><span>${esc(t('days_ago', DAYS))}</span><span>${esc(up)}</span><span>${esc(t('today'))}</span></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderIncidents() {
+      const box = $('incidents');
+      const cutoff = Date.now() - 30 * 864e5;
+      // Incidents en cours d'abord, puis les plus récents ; les résolus disparaissent après 30 jours
+      const list = incidents
+        .filter((i) => !i.resolved_at || new Date(i.resolved_at) > cutoff)
+        .sort((a, b) => (a.resolved_at ? 1 : 0) - (b.resolved_at ? 1 : 0) || new Date(b.started_at) - new Date(a.started_at));
+      if (!list.length) { box.innerHTML = `<div class="empty">${esc(t('no_incident'))}</div>`; return; }
+      box.innerHTML = list.map((i) => {
+        const open = !i.resolved_at;
+        const names = (i.components || []).map((id) => pick(config.components.find((c) => c.id === id)?.name) || id).join(', ');
+        const updates = (i.updates || []).slice().sort((a, b) => new Date(b.at) - new Date(a.at));
+        return `<article class="inc">
+          <h3>${esc(pick(i.title))}<span class="tag ${open ? 'open' : ''}">${esc(open ? t('ongoing') : t('resolved'))}</span></h3>
+          <div class="meta">${esc(fmt(i.started_at))}${i.resolved_at ? ' → ' + esc(fmt(i.resolved_at)) : ''}${names ? ' · ' + esc(names) : ''}</div>
+          ${updates.length ? `<ol>${updates.map((u) => `<li><b>${esc(t(u.status) || u.status)}</b> — ${esc(pick(u.message))}<time>${esc(fmt(u.at))}</time></li>`).join('')}</ol>` : ''}
+        </article>`;
+      }).join('');
+    }
+
+    function render() {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+      document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+      document.title = (lang === 'fr' ? 'Statut des services' : 'Service status') + ' — EasyAd';
+      renderHero();
+      if (config) { renderComponents(); renderIncidents(); }
+    }
+
+    async function load() {
+      const get = (url) => fetch(url, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+      try { config = config || await get('config.json'); } catch { config = { components: [] }; }
+      try { incidents = await get('incidents.json'); } catch { incidents = []; }
+      try { data = await get(DATA_URL + '?t=' + Math.floor(Date.now() / 6e4)); } catch { data = false; }
+      render();
+    }
+
+    document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => {
+      lang = b.dataset.lang;
+      try { localStorage.setItem('easyad-status-lang', lang); } catch { /* rien */ }
+      render();
+    }));
+
+    // Infobulle des barres (souris et toucher)
+    const tip = $('tip');
+    const show = (e) => {
+      const el = e.target.closest('[data-tip]');
+      if (!el) { tip.style.display = 'none'; return; }
+      const r = el.getBoundingClientRect();
+      tip.textContent = el.dataset.tip;
+      tip.style.display = 'block';
+      tip.style.left = Math.min(Math.max(r.left + r.width / 2, 80), window.innerWidth - 80) + 'px';
+      tip.style.top = r.top - 4 + 'px';
+    };
+    document.addEventListener('mouseover', show);
+    document.addEventListener('touchstart', show, { passive: true });
+    document.addEventListener('scroll', () => { tip.style.display = 'none'; }, { passive: true });
+
+    render();
+    load();
+    setInterval(load, 60_000);
+  })();
+  </script>
+</body>
+</html>

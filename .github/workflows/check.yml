@@ -1,0 +1,53 @@
+# Vérifie les services EasyAd toutes les 5 minutes, depuis l'extérieur de nos serveurs.
+# Les mesures vont dans la branche « data » (un seul commit, réécrit à chaque passage : l'historique ne grossit pas).
+name: Vérification
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: status-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Mesures précédentes
+        run: |
+          if git fetch --depth=1 origin data 2>/dev/null; then
+            git show origin/data:status.json > "$RUNNER_TEMP/prev.json" || echo '{}' > "$RUNNER_TEMP/prev.json"
+          else
+            echo '{}' > "$RUNNER_TEMP/prev.json"
+          fi
+
+      - name: Vérifier les services
+        env:
+          # Facultatifs : sans eux, pas d'alerte Telegram (la page fonctionne quand même)
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node check.mjs "$RUNNER_TEMP/prev.json" "$RUNNER_TEMP/status.json"
+
+      - name: Publier les mesures
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dir=$(mktemp -d)
+          cp "$RUNNER_TEMP/status.json" "$dir/status.json"
+          cd "$dir"
+          git init -q -b data
+          git add status.json
+          git -c user.name="EasyAd Status" -c user.email="status@easyyad.com" commit -qm "Mesures $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data

@@ -1,0 +1,7 @@
+{
+  "name": "easyad-status",
+  "private": true,
+  "type": "module",
+  "description": "Page de statut des services EasyAd (status.easyyad.com).",
+  "scripts": { "test": "node --test", "check": "node check.mjs status.json status.json" }
+}

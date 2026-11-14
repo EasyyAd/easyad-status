@@ -1,0 +1,45 @@
+# Publie la page sur GitHub Pages quand la page, la configuration ou les incidents changent.
+name: Publication de la page
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "config.json", "incidents.json", "CNAME", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tests
+        run: node --test
+
+      - name: Assembler la page
+        run: |
+          mkdir -p public
+          cp site/index.html config.json incidents.json public/
+          [ -f CNAME ] && cp CNAME public/ || true
+          # Les mesures sont lues dans la branche « data » de ce dépôt
+          sed -i "s#__REPOSITORY__#${GITHUB_REPOSITORY}#" public/index.html
+          node -e "JSON.parse(require('fs').readFileSync('public/incidents.json','utf8'))" || { echo "incidents.json n'est pas un JSON valide"; exit 1; }
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4

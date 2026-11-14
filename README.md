@@ -34,4 +34,4 @@ Si un service ne fonctionne pas alors que cette page dit le contraire, écrivez-
 | `site/index.html` | La page publique |
 | `incidents.json` | Les incidents annoncés par l'équipe |
 
-Licence MIT. Pour les mainteneurs : voir [MAINTENANCE.md](MAINTENANCE.md).
+Fonctionnement détaillé, annonce des incidents et réutilisation de ce modèle : [MAINTENANCE.md](MAINTENANCE.md). Licence MIT.
