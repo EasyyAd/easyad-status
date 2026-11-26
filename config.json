@@ -4,11 +4,83 @@
   "support": "support@easyyad.com",
   "api_status_url": "https://api.easyyad.com/api/v1/status",
   "components": [
-    { "id": "site", "name": { "fr": "Site easyyad.com", "en": "easyyad.com website" }, "url": "https://easyyad.com/", "expect": "<div id=\"root\"" },
-    { "id": "app", "name": { "fr": "Application (annonceurs, créateurs, développeurs)", "en": "App (advertisers, creators, developers)" }, "url": "https://app.easyyad.com/", "expect": "<div id=\"root\"" },
-    { "id": "partners", "name": { "fr": "Programme partenaires", "en": "Partner programme" }, "url": "https://partners.easyyad.com/", "expect": "<div id=\"root\"" },
-    { "id": "api", "name": { "fr": "API et comptes", "en": "API and accounts" }, "from_api": ["api", "database"] },
-    { "id": "delivery", "name": { "fr": "Diffusion des annonces et paiements", "en": "Ad delivery and payments" }, "url": "https://api.easyyad.com/s/e.js", "expect": "EasyAd", "from_api": ["scheduler"] },
-    { "id": "bot", "name": { "fr": "Bot Telegram @EasyAd_bot", "en": "Telegram bot @EasyAd_bot" }, "from_api": ["bot"] }
+    {
+      "id": "site",
+      "name": {
+        "fr": "Site easyyad.com",
+        "en": "easyyad.com website"
+      },
+      "url": "https://easyyad.com/",
+      "expect": "<div id=\"root\""
+    },
+    {
+      "id": "advertiser",
+      "name": {
+        "fr": "Plateforme annonceurs",
+        "en": "Advertiser platform"
+      },
+      "url": "https://advertiser.easyyad.com/",
+      "expect": "<div id=\"root\""
+    },
+    {
+      "id": "publisher",
+      "name": {
+        "fr": "Plateforme publishers (sites et applis)",
+        "en": "Publisher platform (sites and apps)"
+      },
+      "url": "https://publisher.easyyad.com/",
+      "expect": "<div id=\"root\""
+    },
+    {
+      "id": "app",
+      "name": {
+        "fr": "Plateforme créateurs",
+        "en": "Creator platform"
+      },
+      "url": "https://app.easyyad.com/",
+      "expect": "<div id=\"root\""
+    },
+    {
+      "id": "partners",
+      "name": {
+        "fr": "Programme partenaires",
+        "en": "Partner programme"
+      },
+      "url": "https://partners.easyyad.com/",
+      "expect": "<div id=\"root\""
+    },
+    {
+      "id": "api",
+      "name": {
+        "fr": "API et comptes",
+        "en": "API and accounts"
+      },
+      "from_api": [
+        "api",
+        "database"
+      ]
+    },
+    {
+      "id": "delivery",
+      "name": {
+        "fr": "Diffusion des annonces et paiements",
+        "en": "Ad delivery and payments"
+      },
+      "url": "https://api.easyyad.com/s/e.js",
+      "expect": "EasyAd",
+      "from_api": [
+        "scheduler"
+      ]
+    },
+    {
+      "id": "bot",
+      "name": {
+        "fr": "Diffusion sur les réseaux sociaux",
+        "en": "Social media delivery"
+      },
+      "from_api": [
+        "bot"
+      ]
+    }
   ]
 }

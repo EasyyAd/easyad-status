@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { alertText, evaluate, merge, uptime, worst } from '../lib.mjs';
 
 const config = JSON.parse(fs.readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
-const okHttp = { site: { ok: true, ms: 120 }, app: { ok: true, ms: 140 }, partners: { ok: true, ms: 130 }, delivery: { ok: true, ms: 90 } };
+const okHttp = { site: { ok: true, ms: 120 }, advertiser: { ok: true, ms: 140 }, publisher: { ok: true, ms: 140 }, app: { ok: true, ms: 140 }, partners: { ok: true, ms: 130 }, delivery: { ok: true, ms: 90 } };
 const okApi = { _ms: 80, components: { api: { status: 'operational' }, database: { status: 'operational' }, scheduler: { status: 'operational' }, bot: { status: 'operational' } } };
 
 test('le pire état l’emporte, et un état inconnu ne passe jamais pour opérationnel', () => {
@@ -15,7 +15,7 @@ test('le pire état l’emporte, et un état inconnu ne passe jamais pour opéra
 
 test('tout fonctionne', () => {
   const s = evaluate(config, okHttp, okApi);
-  assert.deepEqual(Object.values(s).map((c) => c.status), Array(6).fill('operational'));
+  assert.deepEqual(Object.values(s).map((c) => c.status), Array(config.components.length).fill('operational'));
   assert.equal(s.api.latency_ms, 80);
 });
 

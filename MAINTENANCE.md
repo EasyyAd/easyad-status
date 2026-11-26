@@ -68,3 +68,19 @@ l'onglet *Actions* affiche « This scheduled workflow is disabled », cliquez su
 ```bash
 node --test
 ```
+
+## Vérifications vraiment toutes les 5 minutes
+
+GitHub ne garantit pas les tâches planifiées (`schedule`) : sur un dépôt peu actif, elles ne passent parfois
+que quelques fois par jour. La page affiche alors « Dernière vérification il y a … ». Pour un rythme régulier,
+un service extérieur déclenche la vérification toutes les 5 minutes (la tâche planifiée reste en secours) :
+
+1. Sur GitHub : Settings › Developer settings › Fine-grained tokens › Generate new token.
+   Accès au seul dépôt `easyad-status`, permission **Actions : Read and write**, rien d'autre.
+2. Sur [cron-job.org](https://cron-job.org) (gratuit) : créer une tâche toutes les 5 minutes.
+   - URL : `https://api.github.com/repos/EasyyAd/easyad-status/actions/workflows/check.yml/dispatches`
+   - Méthode : `POST`
+   - En-têtes : `Authorization: Bearer <le jeton>`, `Accept: application/vnd.github+json`,
+     `X-GitHub-Api-Version: 2022-11-28`, `Content-Type: application/json`
+   - Corps : `{"ref":"main"}`
+   - Réponse attendue : `204`.

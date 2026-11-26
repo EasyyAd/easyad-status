@@ -137,6 +137,9 @@
         major_text: 'Un ou plusieurs services ne répondent pas. Nous sommes dessus.',
         loading: 'Vérification en cours…', no_data: 'Données indisponibles pour le moment',
         no_data_text: 'Réessayez dans quelques minutes.',
+        late: 'Dernière vérification {0}',
+        late_ok: 'Tout fonctionnait lors de cette vérification. La suivante arrive bientôt.',
+        late_bad: 'Un problème était signalé lors de cette vérification. Le détail est ci-dessous.',
         days_ago: '{0} jours', today: "Aujourd'hui", uptime: '{0} % de disponibilité',
         no_check: 'Pas de vérification', tip_ok: '{0} : opérationnel', tip_mixed: '{0} : {1} % disponible',
         updated: 'Dernière vérification {0}', ago_min: 'il y a {0} min', ago_now: "à l'instant", ago_h: 'il y a {0} h',
@@ -153,6 +156,9 @@
         major_text: 'One or more services are not responding. We are on it.',
         loading: 'Checking…', no_data: 'Data unavailable for now',
         no_data_text: 'Please try again in a few minutes.',
+        late: 'Last checked {0}',
+        late_ok: 'Everything was working at that check. The next one is coming soon.',
+        late_bad: 'A problem was reported at that check. Details below.',
         days_ago: '{0} days ago', today: 'Today', uptime: '{0}% uptime',
         no_check: 'No checks', tip_ok: '{0}: operational', tip_mixed: '{0}: {1}% available',
         updated: 'Last checked {0}', ago_min: '{0} min ago', ago_now: 'just now', ago_h: '{0} h ago',
@@ -192,13 +198,14 @@
         $('hero-text').textContent = data === null ? '' : t('no_data_text');
         return;
       }
-      // Une mesure de plus de 30 minutes ne dit plus rien de l'état actuel : on ne l'affiche pas comme du vert
+      // Une mesure de plus de 30 minutes ne dit plus rien de l'état actuel : on ne l'affiche pas comme du vert,
+      // mais on montre ce que disait la dernière vérification et quand elle a eu lieu (plutôt qu'« aucune donnée »)
       const stale = Date.now() - new Date(data.updated_at) > 30 * 6e4;
       const s = stale ? 'degraded' : data.overall;
       hero.className = 'hero s-' + s;
       $('hero-icon').innerHTML = ICONS[s];
-      $('hero-title').textContent = stale ? t('no_data') : t({ operational: 'all_ok', degraded: 'some', down: 'major' }[s]);
-      $('hero-text').textContent = stale ? t('no_data_text') : t({ operational: 'all_ok_text', degraded: 'some_text', down: 'major_text' }[s]);
+      $('hero-title').textContent = stale ? t('late', ago(data.updated_at)) : t({ operational: 'all_ok', degraded: 'some', down: 'major' }[s]);
+      $('hero-text').textContent = stale ? t(data.overall === 'operational' ? 'late_ok' : 'late_bad') : t({ operational: 'all_ok_text', degraded: 'some_text', down: 'major_text' }[s]);
       $('updated').textContent = t('updated', ago(data.updated_at));
     }
 
